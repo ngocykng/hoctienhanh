@@ -1,0 +1,8 @@
+{
+  "name": "Bilingual Vocab AI - Học Từ Vựng Anh, Trung & Nhật",
+  "description": "Ứng dụng học từ vựng đa ngôn ngữ tiếng Anh, tiếng Trung và tiếng Nhật theo chủ đề với flashcard 3D thông minh, bộ lọc hiển thị theo từng cặp ngôn ngữ và trích từ vựng theo timestamp từ video YouTube.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
