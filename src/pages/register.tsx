@@ -42,11 +42,11 @@ export default function RegisterPage({ onSwitchToLogin, onSuccess }: RegisterPro
       {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input type="text" required value={fullName} onChange={(event) => setFullName(event.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Họ và tên" />
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Họ và tên" autoComplete="name" />
         <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Email" />
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Email" autoComplete="email" />
         <input type="password" required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Mật khẩu (ít nhất 6 ký tự)" />
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" placeholder="Mật khẩu (ít nhất 6 ký tự)" autoComplete="new-password" />
         <button type="submit" disabled={loading}
           className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50">
           {loading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
