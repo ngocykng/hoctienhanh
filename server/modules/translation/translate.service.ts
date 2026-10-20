@@ -12,7 +12,7 @@ router.post('/lookup', async (req: Request, res: Response) => {
     }
 
     const response = await generateContentWithRetryAndFallback({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: `Phân tích từ/cụm từ "${text}" (ngôn ngữ nguồn: ${sourceLang || 'auto'}).
 Cung cấp:
 - word_en: từ tiếng Anh tương đương

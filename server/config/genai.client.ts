@@ -28,8 +28,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 export async function generateContentWithRetryAndFallback(options: GenerateWithRetryOptions) {
   // Use gemini-2.5-flash as default for optimal speed and reliability, with gemini-3.7-flash and gemini-3.1-flash-lite as fallbacks
-  const primaryModel = options.model || 'gemini-2.5-flash';
-  const fallbackModels = options.fallbackModels || ['gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-3.1-flash-lite'];
+  const primaryModel = options.model || 'gemini-1.5-flash';
+  const fallbackModels = options.fallbackModels || ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-8b'];
   
   // Create ordered unique list of models to try
   const modelsToTry = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];

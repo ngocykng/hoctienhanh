@@ -67,7 +67,7 @@ Video này không có phụ đề trực tiếp. Dựa vào tiêu đề và ch�
 
   try {
     const response = await generateContentWithRetryAndFallback({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: contentPrompt,
       config: {
         systemInstruction: `You are an expert bilingual subtitle translator and lexicographer for educational video platforms. You ensure 100% verbatim accuracy for original subtitles (no missing words, no hallucinated words), provide precise context-aware Vietnamese translations, and extract key vocabulary with accurate timestamps and standard IPA transcription for English words. Always output valid JSON matching the schema.`,
