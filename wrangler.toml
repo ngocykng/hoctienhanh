@@ -8,4 +8,4 @@ database_name = "hoctienganh-db"
 database_id = "b1a1453-3782-407d-a13f-d5331d66c88a"
 
 [vars]
-APP_URL = "https://REPLACE_WITH_PAGES_DOMAIN"
+APP_URL = "https://hoctienhanh.ngocakira123.workers.dev/"
