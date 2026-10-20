@@ -44,6 +44,12 @@ function tokenPayload(id: string, email: string, role: string) {
   return btoa(JSON.stringify({ userId: id, email, role, exp: Date.now() + 7 * 86400000 }));
 }
 
+app.get('/', (c) => json(c, {
+  name: 'DUOVOCAB.AI API',
+  status: 'ok',
+  health: '/api/health',
+}));
+
 app.get('/api/health', async (c) => {
   try {
     await c.env.DB.prepare('SELECT 1').first();
