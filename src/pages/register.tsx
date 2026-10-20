@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { AuthUser } from './login.tsx';
+import { apiRequest } from '../services/api.ts';
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -19,15 +20,11 @@ export default function RegisterPage({ onSwitchToLogin, onSuccess }: RegisterPro
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const data = await apiRequest<{ token: string; user: AuthUser }>('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, full_name: fullName }),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Đăng ký thất bại.');
-      }
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('user_info', JSON.stringify(data.user));
       onSuccess(data.user);

@@ -346,5 +346,36 @@ npm run dev
   `JWT_SECRET` lên GitHub.
 - Dùng `JWT_SECRET` ngẫu nhiên, đủ dài ở môi trường production.
 - Nên dùng HTTPS khi triển khai thật.
+
+## 13. Triển khai Cloudflare Pages + Workers + D1
+
+Project có Worker API riêng trong `worker/src/index.ts`. Frontend Pages chỉ chứa
+React/Vite; không chạy trực tiếp `server.ts`.
+
+### Tạo D1 và cấu hình Worker
+
+```powershell
+npm install
+npx wrangler login
+npx wrangler d1 create hoctienganh-db
+```
+
+Copy `database_id` từ kết quả lệnh trên vào `wrangler.toml`, đồng thời thay
+`APP_URL` bằng domain Pages production. Sau đó tạo bảng từ migration:
+
+```powershell
+npx wrangler d1 execute hoctienganh-db --remote --file=./worker/migrations/0001_initial.sql
+npx wrangler secret put GEMINI_API_KEY
+npx wrangler secret put JWT_SECRET
+npm run deploy:api
+```
+
+Worker sẽ có URL dạng `https://hoctienganh-api.<subdomain>.workers.dev`.
+Đặt URL đó làm biến `VITE_API_URL` trong Cloudflare Pages, rồi redeploy
+frontend với build command `npm run build:client` và output directory `dist`.
+
+`server.ts` và PostgreSQL vẫn được giữ để chạy local. API video YouTube hiện
+chưa được chuyển sang Worker vì thư viện transcript hiện tại phụ thuộc Node;
+các API auth, vocabulary CRUD và các API Gemini đã có trong Worker D1.
 #   h o c t i e n h a n h  
  

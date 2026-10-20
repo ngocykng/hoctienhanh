@@ -1,0 +1,11 @@
+name = "hoctienganh-api"
+main = "worker/src/index.ts"
+compatibility_date = "2026-10-20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hoctienganh-db"
+database_id = "b1a1453-3782-407d-a13f-d5331d66c88a"
+
+[vars]
+APP_URL = "https://REPLACE_WITH_PAGES_DOMAIN"

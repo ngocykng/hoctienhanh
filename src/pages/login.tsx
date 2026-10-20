@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, BookOpenCheck, ShieldCheck } from 'lucide-react';
+import { apiRequest } from '../services/api.ts';
 
 interface LoginProps {
     onSwitchToRegister: () => void;
@@ -29,15 +30,11 @@ export default function Login({ onSwitchToRegister, onSuccess }: LoginProps) {
         setLoading(true);
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const data = await apiRequest<{ token: string; user: AuthUser }>('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Đăng nhập thất bại.');
-            }
             localStorage.setItem('auth_token', data.token);
             localStorage.setItem('user_info', JSON.stringify(data.user));
             onSuccess(data.user);
