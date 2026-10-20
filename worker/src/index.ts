@@ -11,7 +11,11 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 app.use('*', cors({
-  origin: (origin, c) => origin === c.env.APP_URL ? origin : '',
+  origin: (origin, c) => {
+    if (!origin) return '*';
+    if (origin === c.env.APP_URL || origin.endsWith('.pages.dev')) return origin;
+    return c.env.APP_URL || origin;
+  },
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
@@ -237,5 +241,7 @@ app.post('/api/vocab/generate', async (c) => {
 });
 
 app.all('/api/video/*', (c) => json(c, { error: 'Video API chưa được chuyển sang Cloudflare Worker. Hãy dùng custom transcript sau khi migration video hoàn tất.' }, 501));
+
+app.notFound((c) => json(c, { error: 'API route không tồn tại.' }, 404));
 
 export default app;
