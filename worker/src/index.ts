@@ -29,8 +29,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 
 // Helper to get DB client
 async function getDbClient(c: any) {
+  const connectionString = c.env.HYPERDRIVE?.connectionString || process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error('Database connection string not found. Please configure HYPERDRIVE binding or DATABASE_URL environment variable.');
+  }
+
   const client = new Client({
-    connectionString: c.env.HYPERDRIVE.connectionString,
+    connectionString: connectionString,
   });
   await client.connect();
   return client;
