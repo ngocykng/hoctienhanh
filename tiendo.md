@@ -55,3 +55,75 @@
 ### 📝 Ghi chú cho lần tới
 - Kiểm tra lại tính năng `Auto-fill` xem Gemini có trả về đúng định dạng JSON không.
 - Kiểm tra tính năng `Check-sentence` để đảm bảo AI đánh giá chính xác.
+Để bạn dễ theo dõi, tôi xin tóm tắt lại toàn bộ những thay đổi tôi đã thực hiện để sửa lỗi "không cập nhật số lượng học
+  viên" và lỗi "crash server".
+
+  Tôi đã thực hiện thay đổi trên 4 file chính:
+
+  1. server/modules/admin/admin.routes.ts (Tạo mới)
+
+  - Thay đổi: Tạo file này để tách biệt các API quản trị.
+  - Mục đích: Định nghĩa route /status cho admin. Khi kết hợp với prefix ở server.ts, nó tạo ra endpoint
+    /api/admin/status.
+
+  2. server.ts (Sửa đổi)
+
+  - Thay đổi:
+    - Import adminRoutes từ file vừa tạo.
+    - Thêm dòng: app.use('/api/admin', adminRoutes);.
+  - Mục đích: Kích hoạt đường dẫn /api/admin/... cho toàn bộ ứng dụng. Trước đó, API này bị đặt nhầm trong /api/auth/...
+    khiến Frontend không gọi được.
+
+  3. server/auth/auth.routes.ts (Sửa đổi)
+
+  - Thay đổi: Xóa bỏ dòng router.get('/admin/status', getadminstatus); và các import liên quan đến admin.
+  - Mục đích: Dọn dẹp code, tránh xung đột route và loại bỏ những import không sử dụng (giảm cảnh báo TypeScript).
+
+  4. src/services/api.ts (Sửa đổi)
+
+  - Thay đổi:
+    - Thay thế fetch() trực tiếp bằng apiRequest().
+    - Sửa tên hàm từ fetchAdminstatus $\rightarrow$ fetchAdminStats (để khớp với Admin.tsx).
+    - Thêm ép kiểu as { data: { totalUsers: number } }.
+  - Mục đích:
+    - Đảm bảo gọi đúng URL (bao gồm cả domain/port từ API_BASE_URL).
+    - Xóa bỏ lỗi TypeScript 'result' is of type 'unknown'.
+    - Đảm bảo trả về đúng object dữ liệu cho giao diện.
+
+  ---
+
+  - Thay đổi:
+    - Import adminRoutes từ file vừa tạo.
+    - Thêm dòng: app.use('/api/admin', adminRoutes);.
+  - Mục đích: Kích hoạt đường dẫn /api/admin/... cho toàn bộ ứng dụng. Trước đó, API này bị đặt nhầm trong /api/auth/...
+    khiến Frontend không gọi được.
+
+  3. server/auth/auth.routes.ts (Sửa đổi)
+
+  - Thay đổi: Xóa bỏ dòng router.get('/admin/status', getadminstatus); và các import liên quan đến admin.
+  - Mục đích: Dọn dẹp code, tránh xung đột route và loại bỏ những import không sử dụng (giảm cảnh báo TypeScript).
+
+  4. src/services/api.ts (Sửa đổi)
+
+  - Thay đổi:
+    - Thay thế fetch() trực tiếp bằng apiRequest().
+    - Sửa tên hàm từ fetchAdminstatus $\rightarrow$ fetchAdminStats (để khớp với Admin.tsx).
+    - Thêm ép kiểu as { data: { totalUsers: number } }.
+  - Mục đích:
+    - Đảm bảo gọi đúng URL (bao gồm cả domain/port từ API_BASE_URL).
+    - Xóa bỏ lỗi TypeScript 'result' is of type 'unknown'.
+    - Đảm bảo trả về đúng object dữ liệu cho giao diện.
+
+  ---
+
+  $\rightarrow$ admin.routes.ts $\rightarrow$ admin.controller.ts $\rightarrow$ Database (PostgreSQL) $\rightarrow$ Trả về
+    - Đảm bảo gọi đúng URL (bao gồm cả domain/port từ API_BASE_URL).
+    - Xóa bỏ lỗi TypeScript 'result' is of type 'unknown'.
+    - Đảm bảo trả về đúng object dữ liệu cho giao diện.
+
+  ---
+
+  Tóm lại luồng chạy mới:
+  Admin.tsx $\rightarrow$ gọi fetchAdminStats() $\rightarrow$ apiRequest('/api/admin/status') $\rightarrow$ server.ts
+  $\rightarrow$ admin.routes.ts $\rightarrow$ admin.controller.ts $\rightarrow$ Database (PostgreSQL) $\rightarrow$ Trả về
+  số lượng học viên $\rightarrow$ Hiển thị lên màn hình.

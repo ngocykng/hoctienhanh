@@ -2,10 +2,11 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
-import vocabRoutes from './server/modules/vocab-by-topic/vocab.routes.ts';
-import videoRoutes from './server/modules/video-vocab/video.routes.ts';
-import translateRoutes from './server/modules/translation/translate.service.ts';
+import vocabRoutes from './server/routes/vocab.routes.ts';
+import videoRoutes from './server/routes/video.routes.ts';
+import translateRoutes from './server/services/translation.service.ts';
 import authRoutes from './server/auth/auth.routes.ts';
+import adminRoutes from './server/routes/admin.routes.ts';
 import { pool } from './server/db/pool.ts';
 
 dotenv.config();
@@ -49,6 +50,7 @@ async function startServer() {
   app.use('/api/video', videoRoutes);
   app.use('/api/translate', translateRoutes);
   app.use('/api/auth', authRoutes);
+  app.use('/api/admin', adminRoutes);
 
   // Vite middleware for development vs static for production
   if (process.env.NODE_ENV !== 'production') {

@@ -45,26 +45,46 @@ async function getDbClient(c: any) {
 async function gemini(c: any, prompt: string): Promise<unknown> {
   if (!c.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY chưa được cấu hình.');
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${c.env.GEMINI_API_KEY}`,
+    `https://openrouter.ai/api/v1/chat/completions`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${c.env.GEMINI_API_KEY}`,
+        'HTTP-Referer': c.env.APP_URL || 'http://localhost:8787',
+        'X-Title': 'DuoVocab AI',
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' },
+        model: 'google/gemini-flash-1.5',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
       }),
     },
   );
-  if (!response.ok) throw new Error(`Gemini trả về HTTP ${response.status}.`);
-  const body = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-  const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Gemini không trả về dữ liệu.');
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`OpenRouter trả về HTTP ${response.status}. Chi tiết: ${errorBody}`);
+  }
+  const body = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+  const text = body.choices?.[0]?.message?.content;
+  if (!text) throw new Error('OpenRouter không trả về dữ liệu.');
   return JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
 }
 
 function tokenPayload(id: string, email: string, role: string) {
   return btoa(JSON.stringify({ userId: id, email, role, exp: Date.now() + 7 * 86400000 }));
 }
+
+app.get('/api/debug/models', async (c) => {
+  try {
+    if (!c.env.GEMINI_API_KEY) return json(c, { error: 'GEMINI_API_KEY chưa được cấu hình.' }, 500);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${c.env.GEMINI_API_KEY}`);
+    const data = await response.json();
+    return json(c, data);
+  } catch (error) {
+    return json(c, { error: errorMessage(error) }, 500);
+  }
+});
 
 app.get('/', (c) => json(c, {
   name: 'DUOVOCAB.AI API',
@@ -320,7 +340,7 @@ app.post('/api/vocab/autofill', async (c) => {
   try {
     const body = await c.req.json<{ inputWord?: string; existingFields?: unknown }>();
     if (!body.inputWord?.trim()) return json(c, { error: 'Vui lòng nhập từ cần điền.' }, 400);
-    return json(c, { success: true, data: await gemini(c, `Trả về JSON thông tin từ vựng đa ngôn ngữ cho "${body.inputWord}". Các trường: word_en, ipa_en, word_zh, pinyin, word_ja, reading_ja, meaning_vi, example_en, example_zh, example_ja, example_meaning_vi, difficulty.`) });
+    return json(c, { success: true, data: await gemini(c, `Trả về định dạng JSON thông tin từ vựng đa ngôn ngữ cho "${body.inputWord}". Yêu cầu kết quả là một đối tượng JSON với các trường: word_en, ipa_en, word_zh, pinyin, word_ja, reading_ja, meaning_vi, example_en, example_zh, example_ja, example_meaning_vi, difficulty.`) });
   } catch (error) { return json(c, { error: errorMessage(error) }, 500); }
 });
 
@@ -328,7 +348,7 @@ app.post('/api/translate/lookup', async (c) => {
   try {
     const body = await c.req.json<{ text?: string; sourceLang?: string }>();
     if (!body.text) return json(c, { error: 'Text required' }, 400);
-    return json(c, { success: true, data: await gemini(c, `Phân tích "${body.text}" (${body.sourceLang || 'auto'}). Trả về JSON với word_en, word_zh, pinyin, meaning_vi, example_sentence.`) });
+    return json(c, { success: true, data: await gemini(c, `Hãy trả về kết quả dưới định dạng JSON. Phân tích "${body.text}" (${body.sourceLang || 'auto'}). Kết quả JSON gồm các trường: word_en, word_zh, pinyin, meaning_vi, example_sentence.`) });
   } catch (error) { return json(c, { error: errorMessage(error) }, 500); }
 });
 
@@ -336,7 +356,7 @@ app.post('/api/vocab/check-sentence', async (c) => {
   try {
     const body = await c.req.json();
     if (!body.targetWord || !body.userSentence) return json(c, { error: 'Thiếu từ mục tiêu hoặc câu cần kiểm tra.' }, 400);
-    return json(c, { success: true, result: await gemini(c, `Đánh giá câu "${body.userSentence}" dùng từ "${body.targetWord}". Trả JSON gồm isCorrect, score, wordUsedCorrectly, overallFeedback, errors, improvedSentence, vietnameseMeaning, betterAlternatives.`) });
+    return json(c, { success: true, result: await gemini(c, `Hãy trả về kết quả dưới định dạng JSON. Đánh giá câu "${body.userSentence}" dùng từ "${body.targetWord}". Kết quả JSON gồm: isCorrect, score, wordUsedCorrectly, overallFeedback, errors, improvedSentence, vietnameseMeaning, betterAlternatives.`) });
   } catch (error) { return json(c, { error: errorMessage(error) }, 500); }
 });
 
@@ -346,7 +366,7 @@ app.post('/api/vocab/generate', async (c) => {
     const body = await c.req.json<{ topic?: string; level?: string; excludeWords?: string[] }>();
     if (!body.topic?.trim()) return json(c, { error: 'Vui lòng cung cấp chủ đề hợp lệ.' }, 400);
 
-    const items = await gemini(c, `Tạo mảng JSON 15 từ vựng cho chủ đề "${body.topic}" trình độ ${body.level || 'ALL'}. Mỗi item có word_en, ipa_en, word_zh, pinyin, word_ja, reading_ja, meaning_vi, example_en, example_zh, example_ja, example_meaning_vi, difficulty. Không lặp các từ: ${(body.excludeWords || []).slice(0, 50).join(', ')}.`) as Array<Record<string, string>>;
+    const items = await gemini(c, `Hãy trả về kết quả dưới định dạng mảng JSON. Tạo mảng 15 từ vựng cho chủ đề "${body.topic}" trình độ ${body.level || 'ALL'}. Mỗi item JSON có word_en, ipa_en, word_zh, pinyin, word_ja, reading_ja, meaning_vi, example_en, example_zh, example_ja, example_meaning_vi, difficulty. Không lặp các từ: ${(body.excludeWords || []).slice(0, 50).join(', ')}.`) as Array<Record<string, string>>;
 
     const topic = { id: id('topic'), name: body.topic.trim(), level: body.level || 'ALL', batch: 1, created_at: new Date().toISOString(), card_count: items.length };
 

@@ -1,16 +1,9 @@
-import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || '',
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    },
-  },
-});
+const API_KEY = process.env.GEMINI_API_KEY || '';
+const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1';
 
 interface GenerateWithRetryOptions {
   model?: string;
@@ -23,31 +16,59 @@ interface GenerateWithRetryOptions {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Robust Gemini generation with immediate model fallback on 503 (High Demand)
- * and exponential backoff retry for transient network issues.
+ * Robust Gemini generation using DIRECT HTTP calls to avoid v1beta issues.
+ * This forces the use of API version v1.
  */
 export async function generateContentWithRetryAndFallback(options: GenerateWithRetryOptions) {
-  // Use gemini-2.5-flash as default for optimal speed and reliability, with gemini-3.7-flash and gemini-3.1-flash-lite as fallbacks
-  const primaryModel = options.model || 'gemini-1.5-flash';
-  const fallbackModels = options.fallbackModels || ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-8b'];
-  
-  // Create ordered unique list of models to try
+  const primaryModel = options.model || 'gemini-3.8-flash';
+  const fallbackModels = options.fallbackModels || ['gemini-3.7-flash'];
+
   const modelsToTry = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
-  
+
   let lastError: any = null;
 
   for (const currentModel of modelsToTry) {
-    // 1 retry on same model if transient network, but switch models immediately on 503 High Demand
     const maxAttempts = 2;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const response = await ai.models.generateContent({
-          model: currentModel,
-          contents: options.contents,
-          config: options.config,
+        const url = `${API_BASE_URL}/models/${currentModel}:generateContent?key=${API_KEY}`;
+
+        // Construct payload for Gemini API v1
+        const payload = {
+          contents: Array.isArray(options.contents)
+            ? options.contents
+            : [{ role: 'user', parts: [{ text: options.contents }] }],
+          systemInstruction: options.config?.systemInstruction
+            ? { parts: [{ text: options.config.systemInstruction }] }
+            : undefined,
+          generationConfig: {
+            temperature: options.config?.temperature,
+            responseMimeType: options.config?.responseMimeType,
+            responseSchema: options.config?.responseSchema,
+          },
+        };
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
 
-        return response;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw {
+            status: response.status,
+            code: errorData.error?.code,
+            message: errorData.error?.message || response.statusText,
+          };
+        }
+
+        const data = await response.json();
+
+        // Extract text from the nested Gemini response structure
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        return { text };
+
       } catch (error: any) {
         lastError = error;
         const errorMessage = error?.message || String(error);
@@ -76,13 +97,11 @@ export async function generateContentWithRetryAndFallback(options: GenerateWithR
           errorMessage.includes('timeout');
 
         if (is503Overloaded || isModelUnavailable) {
-          // If model is overloaded or unavailable/discontinued, switch to the next fallback model immediately
           console.warn(`[Gemini API] Model ${currentModel} returned ${errorCode || 'error'} (${isModelUnavailable ? 'Unavailable/Discontinued' : 'High demand'}). Switching to next fallback model...`);
-          break; // Break inner loop to try next model immediately
+          break;
         }
 
         if (!isOtherRetryable) {
-          // Non-retryable error (e.g. invalid parameter format)
           throw error;
         }
 

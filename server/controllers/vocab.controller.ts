@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { generateVocabByTopic, autoFillVocabCard, checkSentenceWithAI } from './vocab.service.ts';
-import { db } from '../../db/store.ts';
+import { generateVocabByTopic, autoFillVocabCard, checkSentenceWithAI } from '../services/vocab.service.ts';
+import { db } from '../db/store.ts';
 import { Topic, VocabCard } from '../../../src/types/index.ts';
 
 export async function handleGenerateVocab(req: Request, res: Response) {

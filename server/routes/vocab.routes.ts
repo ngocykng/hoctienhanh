@@ -12,7 +12,7 @@ import {
   handleGetAllNotebookCards,
   handleCreateTopic,
   handleCheckSentence,
-} from './vocab.controller.ts';
+} from '../controllers/vocab.controller.ts';
 
 const router = Router();
 

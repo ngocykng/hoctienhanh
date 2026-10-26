@@ -1,4 +1,4 @@
-import { generateContentWithRetryAndFallback } from '../../config/genai.client.ts';
+import { generateContentWithRetryAndFallback } from '../config/genai.client.ts';
 import { Type } from '@google/genai';
 
 export interface GeneratedVocabItem {
@@ -62,7 +62,7 @@ Với mỗi từ/cụm từ, trả về đúng JSON schema sau:
 
   try {
     const response = await generateContentWithRetryAndFallback({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
         systemInstruction: `You are an expert multilingual lexicographer and CEFR/HSK/JLPT language educator. You generate precisely 15 vocabulary items (including both single words and high-frequency English phrases, phrasal verbs, collocations, and idioms) matching the specified CEFR level (A1, A2, B1, B2, C1, C2) and topic. Ensure standard IPA phonetic transcription for English words/phrases, 100% correct Hanzi with tone-marked Pinyin for Chinese, natural Kanji/Kana with Hiragana & Romaji reading for Japanese, natural sentences in English, Chinese, and Japanese, and accurate Vietnamese definitions. Always output a diverse and randomized selection of terms, strictly avoiding any provided excluded words. Always output a valid JSON array matching the schema.`,
@@ -139,7 +139,7 @@ Hãy phân tích và tự động điền đầy đủ, chuẩn xác tất cả 
 
   try {
     const response = await generateContentWithRetryAndFallback({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
         systemInstruction: `You are an expert trilingual lexicographer and language curriculum designer (English, Chinese, Japanese, Vietnamese). Given any input query (which could be in English, Chinese, Japanese, or Vietnamese), return a complete, highly accurate multilingual vocabulary card with standard IPA for English, tone-marked Pinyin for Chinese, Kanji/Kana with Hiragana & Romaji for Japanese, natural contextual example sentences in English, Chinese, and Japanese, clear Vietnamese translation, and appropriate CEFR level. Always return a single JSON object strictly matching the schema.`,
@@ -245,7 +245,7 @@ Hãy đóng vai trò là một chuyên gia ngôn ngữ và giáo viên bản ng�
 
   try {
     const response = await generateContentWithRetryAndFallback({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
         systemInstruction: `You are an expert linguistics tutor and grammar evaluator. Carefully analyze the user's sentence practice with the target word. Accurately detect grammatical mistakes, spelling, punctuation, tense agreement, preposition usage, and collocations. Provide precise, constructive, encouraging explanations in Vietnamese. Always output valid JSON strictly adhering to the schema.`,

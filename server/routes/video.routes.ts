@@ -4,7 +4,7 @@ import {
   handleGetVideoSessions,
   handleGetVideoSessionById,
   handleUpdateSubtitles,
-} from './video.controller.ts';
+} from '../controllers/video.controller.ts';
 
 const router = Router();
 

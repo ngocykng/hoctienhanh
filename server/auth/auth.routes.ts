@@ -4,7 +4,6 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
-import { error } from 'node:console';
 
 const routes = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });

@@ -1,4 +1,4 @@
-import { generateContentWithRetryAndFallback } from '../../config/genai.client.ts';
+import { generateContentWithRetryAndFallback } from '../config/genai.client.ts';
 import { Type } from '@google/genai';
 import { VideoTranscriptItem, SubtitleItem } from '../../../src/types/index.ts';
 

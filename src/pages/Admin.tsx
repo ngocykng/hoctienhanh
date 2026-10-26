@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { data, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Bell,
   BookOpen,
@@ -15,7 +15,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { motion } from 'motion/react';
-
+import { fetchAdminStats } from '../services/api.ts';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Tổng quan', path: '/admin' },
   { icon: Users, label: 'Quản lý học viên', path: '/admin/qlhocvien' },
@@ -23,22 +23,42 @@ const menuItems = [
   { icon: Settings, label: 'Cấu hình hệ thống', path: '/admin/setting' },
 ];
 
-const stats = [
-  { label: 'Tổng học viên', value: '1,234', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { label: 'Thời gian học', value: '5,678 giờ', icon: Clock, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { label: 'Bài học hoàn thành', value: '89%', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
-  { label: 'Tăng trưởng tháng', value: '+12%', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
-];
+
 
 interface AdminProps {
   onLogout: () => void;
 }
-
+interface AdminStatus {
+  totalUsers: number;
+  totalTime: number;
+  completedLessons: number;
+  growthRate: number;
+}
 export default function Admin({ onLogout }: AdminProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [loading, setLoading] = useState(true);
+  const [userCount, setUserCount] = useState('...');
+  const [timeCount, setTimeCount] = useState('...');
+  const [rateCount, setRateCount] = useState('...');
+  const [growthCount, setGrowthCount] = useState('...');
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const statsData = (await fetchAdminStats()) as AdminStatus;
+        setUserCount(statsData.totalUsers.toLocaleString());
+        setTimeCount(`${statsData.totalTime.toLocaleString()} giờ`);
+        setRateCount(`${statsData.completedLessons.toLocaleString()}%`);
+        setGrowthCount(`+${statsData.growthRate}%`);
+      } catch (error) {
+        console.error('Error fetching admin status:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadStats();
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
@@ -46,7 +66,12 @@ export default function Admin({ onLogout }: AdminProps) {
   };
 
   const isOverviewPage = location.pathname === '/admin';
-
+  const stats = [
+    { label: 'Tổng học viên', value: userCount, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Thời gian học', value: timeCount, icon: Clock, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Bài học hoàn thành', value: rateCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Tăng trưởng tháng', value: growthCount, icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
+  ];
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <motion.aside
@@ -181,7 +206,11 @@ export default function Admin({ onLogout }: AdminProps) {
                       </div>
                     </div>
                     <p className="mt-5 text-sm font-medium text-slate-500">{stat.label}</p>
-                    <div className="mt-1 text-2xl font-bold text-slate-900">{stat.value}</div>
+                    {loading ? (
+                      <div className="mt-1 text-2xl font-bold text-slate-900">...</div>
+                    ) : (
+                      <div className="mt-1 text-2xl font-bold text-slate-900">{stat.value}</div>
+                    )}
                   </div>
                 ))}
               </section>

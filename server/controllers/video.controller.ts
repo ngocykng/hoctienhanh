@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { extractYouTubeVideoId, fetchYouTubeTranscript, cleanTranscriptText, mergeTranscriptFragments } from './transcript.service.ts';
-import { extractVocabFromTranscript } from './word-extractor.service.ts';
-import { db } from '../../db/store.ts';
+import { extractYouTubeVideoId, fetchYouTubeTranscript, cleanTranscriptText, mergeTranscriptFragments } from '../services/transcript.service.ts';
+import { extractVocabFromTranscript } from '../services/word-extractor.service.ts';
+import { db } from '../db/store.ts';
 import { VideoSession, VideoWord, SubtitleItem, VideoTranscriptItem } from '../../../src/types/index.ts';
 
 export async function handleExtractVideoVocab(req: Request, res: Response) {

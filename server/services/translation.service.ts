@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { generateContentWithRetryAndFallback } from '../../config/genai.client.ts';
+import { generateContentWithRetryAndFallback } from '../config/genai.client.ts';
 import { Type } from '@google/genai';
 
 const router = Router();

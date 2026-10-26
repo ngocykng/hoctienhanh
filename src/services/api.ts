@@ -1,7 +1,13 @@
 import { Topic, VocabCard, VideoSession, VideoWord, SubtitleItem, SentenceCheckResult } from '../types/index.ts';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-
+interface AdminStatsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    totalUsers: number;
+  };
+}
 export async function apiRequest<T = Record<string, unknown>>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, options);
   const text = await res.text();
@@ -166,4 +172,9 @@ export async function checkSentence(params: {
     body: JSON.stringify(params),
   });
   return data.result;
+}
+
+export async function fetchAdminStats() {
+  const data = await apiRequest<{ data: { totalUsers: number } }>('/api/admin/status');
+  return data.data;
 }
