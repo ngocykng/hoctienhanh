@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import type { AuthUser } from './login.tsx';
 import { apiRequest } from '../services/api.ts';
+import { useNavigate, Link } from 'react-router-dom';
 
 interface RegisterProps {
-  onSwitchToLogin: () => void;
   onSuccess: (user: AuthUser) => void;
 }
 
-export default function RegisterPage({ onSwitchToLogin, onSuccess }: RegisterProps) {
+export default function RegisterPage({ onSuccess }: RegisterProps) {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +29,7 @@ export default function RegisterPage({ onSwitchToLogin, onSuccess }: RegisterPro
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('user_info', JSON.stringify(data.user));
       onSuccess(data.user);
+      navigate('/topics');
     } catch (caughtError: unknown) {
       setError(caughtError instanceof Error ? caughtError.message : 'Đăng ký thất bại.');
     } finally {
@@ -54,9 +56,9 @@ export default function RegisterPage({ onSwitchToLogin, onSuccess }: RegisterPro
       </form>
       <div className="mt-6 text-center text-sm text-gray-600">
         Đã có tài khoản?{' '}
-        <button type="button" onClick={onSwitchToLogin} className="text-blue-600 font-semibold hover:underline">
+        <Link to="/login" className="text-blue-600 font-semibold hover:underline">
           Đăng nhập ngay
-        </button>
+        </Link>
       </div>
     </div>
   );

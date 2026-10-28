@@ -178,3 +178,7 @@ export async function fetchAdminStats() {
   const data = await apiRequest<{ data: { totalUsers: number } }>('/api/admin/status');
   return data.data;
 }
+export async function fetchAllUsers() {
+  const data = await apiRequest<{ data: { id: string; email: string; full_name: string; role: 'admin' | 'user'; created_at: number }[] }>('/api/admin/hocvien');
+  return data.data;
+}

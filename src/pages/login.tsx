@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, BookOpenCheck, ShieldCheck } from 'lucide-react';
 import { apiRequest } from '../services/api.ts';
+import { useNavigate, Link } from 'react-router-dom';
 
 interface LoginProps {
-    onSwitchToRegister: () => void;
     onSuccess: (user: AuthUser) => void;
 }
 
@@ -16,7 +16,8 @@ export interface AuthUser {
 
 }
 
-export default function Login({ onSwitchToRegister, onSuccess }: LoginProps) {
+export default function Login({ onSuccess }: LoginProps) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +39,12 @@ export default function Login({ onSwitchToRegister, onSuccess }: LoginProps) {
             localStorage.setItem('auth_token', data.token);
             localStorage.setItem('user_info', JSON.stringify(data.user));
             onSuccess(data.user);
+
+            if (data.user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/topics');
+            }
         } catch (caughtError: unknown) {
             setError(caughtError instanceof Error ? caughtError.message : 'Đăng nhập thất bại.');
         } finally {
@@ -194,13 +201,12 @@ export default function Login({ onSwitchToRegister, onSuccess }: LoginProps) {
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                     <p className="text-xs text-gray-500">
                         Bạn chưa có tài khoản?{' '}
-                        <button
-                            type="button"
-                            onClick={onSwitchToRegister}
+                        <Link
+                            to="/register"
                             className="font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
                         >
                             Đăng ký miễn phí
-                        </button>
+                        </Link>
                     </p>
                 </div>
             </motion.div>

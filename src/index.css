@@ -1,1 +1,61 @@
+/* src/index.css */
 @import "tailwindcss";
+
+/* Thêm @reference để Tailwind v4 hiểu các utility classes khi dùng @apply */
+@reference "tailwindcss";
+
+/* Hiệu ứng cho thẻ Card trong Admin */
+.admin-card {
+    @apply bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-300;
+}
+
+.admin-card:hover {
+    @apply shadow-md -translate-y-1 border-blue-200;
+}
+
+/* Style cho Table chuyên nghiệp */
+.student-table {
+    @apply w-full border-collapse overflow-hidden rounded-lg;
+}
+
+.student-table thead {
+    @apply bg-gray-50 text-gray-600 uppercase text-xs font-semibold;
+}
+
+.student-table th {
+    @apply px-6 py-4 text-left border-b border-gray-200;
+}
+
+.student-table td {
+    @apply px-6 py-4 border-b border-gray-100 text-sm text-gray-700 transition-colors;
+}
+
+.student-table tr:hover td {
+    @apply bg-blue-50/50;
+}
+
+/* Badge trạng thái */
+.status-badge {
+    @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-active {
+    @apply bg-green-100 text-green-700;
+}
+
+.status-inactive {
+    @apply bg-red-100 text-red-700;
+}
+
+/* Nút hành động */
+.btn-action {
+    @apply p-2 rounded-md transition-colors duration-200;
+}
+
+.btn-edit {
+    @apply text-blue-600 hover:bg-blue-100;
+}
+
+.btn-delete {
+    @apply text-red-600 hover:bg-red-100;
+}

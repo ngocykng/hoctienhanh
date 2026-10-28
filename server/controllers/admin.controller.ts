@@ -16,3 +16,16 @@ export const getadminstatus = async (req: Request, res: Response) => {
         res.status(500).json({success: false, message: 'Lỗi server', error: error});
     }
 }
+export const gethocvien = async (req: Request, res: Response) => {
+    try {
+        const result = await pool.query('SELECT id, email, full_name, role, created_at FROM users');
+        const users = result.rows;
+        res.json({
+            success: true,
+            message: 'Thanh cong',
+            data: users
+        })
+    } catch (error) {
+        res.status(500).json({success: false, message: 'Lỗi server', error: error});
+    }
+}

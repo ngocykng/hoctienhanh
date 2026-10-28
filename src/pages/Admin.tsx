@@ -18,8 +18,8 @@ import { motion } from 'motion/react';
 import { fetchAdminStats } from '../services/api.ts';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Tổng quan', path: '/admin' },
-  { icon: Users, label: 'Quản lý học viên', path: '/admin/qlhocvien' },
-  { icon: BookOpen, label: 'Quản lý nội dung', path: '/admin/qlnoidung' },
+  { icon: Users, label: 'Quản lý học viên', path: '/admin/QLhocvien' },
+  { icon: BookOpen, label: 'Quản lý nội dung', path: '/admin/Qlnoidung' },
   { icon: Settings, label: 'Cấu hình hệ thống', path: '/admin/setting' },
 ];
 
@@ -57,6 +57,7 @@ export default function Admin({ onLogout }: AdminProps) {
         setLoading(false);
       }
     }
+
     loadStats();
   }, []);
   const handleLogout = () => {

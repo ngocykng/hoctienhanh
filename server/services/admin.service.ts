@@ -11,3 +11,7 @@ export const getSystemStatus = async () => {
     const growthRate = Math.round((completedLessons / totalUsers) * 100);
     return { totalUsers, totalTime, completedLessons, growthRate };
 }
+export const getAllUsers = async () => {
+    const res = await pool.query('SELECT id, email, full_name, role,created_at FROM users');
+    return res.rows;
+}
